@@ -1307,6 +1307,100 @@ No two teams can have the same name. The team name must be unique. The course ad
 **Assumptions:** AS-one-section-per-student (an invitation is keyed by the invited address alone, which is unambiguous only because a student is invited to one course section)
 **Open Issues:**
 
+### **UC-STU-remind-non-submitters: The instructor reminds students who have not submitted**
+
+**UC ID and Name:** UC-STU-remind-non-submitters: Remind students who have not submitted
+**Created By:**
+**Date Created:**
+**Primary Actor:** instructor
+**Secondary Actors:** student
+**Trigger:** The instructor indicates to view the students of a course section who have not submitted for the reminder week.
+**Description:** The instructor wants to see which students in her course section still owe a weekly activity report or a peer evaluation for the reminder week, and to remind only those students, so that students who are already done are not emailed.
+
+**Preconditions:**
+- PRE-1. The instructor is logged into the system.
+- PRE-2. The instructor is assigned to the course section (BR-section-scoped-access).
+
+**Postconditions:**
+- POST-1. The instructor is shown, for the reminder week, every outstanding student and which artifacts each one owes, as defined in "Outstanding" in the Associated Information.
+- POST-2. Each student the instructor selected who was still outstanding when the reminder was sent, and who is within the reminder limit, has been sent one reminder email.
+- POST-3. Every reminder sent is recorded with its student, artifacts, reminder week, and time sent.
+- POST-4. The instructor is told which selected students were reminded, which were skipped and why, and which could not be emailed.
+
+**Main Success Scenario:**
+1. The instructor indicates to view the students of a course section who have not submitted.
+2. The system determines the reminder week according to "Reminder week" in the Associated Information.
+3. The system displays every outstanding student in the course section, according to "Outstanding" and "List display" in the Associated Information, and how many there are.
+4. The instructor selects the students to remind and confirms that she has finished selecting.
+5. The system displays the number of selected students and the reminder message, and asks the instructor to confirm.
+6. The instructor confirms sending the reminders.
+7. For each selected student, the system re-evaluates her status according to "Outstanding" and checks the reminder limit (BR-reminder-limit).
+8. The system sends each selected student who is still outstanding and within the limit one email naming only the artifacts she still owes, according to "Reminder message" in the Associated Information.
+9. The system records each reminder it sent.
+10. The system reports to the instructor which students were reminded and which were skipped, with the reason for each skip.
+11. Use case ends.
+
+**Extensions:**
+- **2a. The reminder week is not one of the course section's active weeks (BR-active-weeks):**
+  - 2a1. The system informs the instructor that no weekly activity report or peer evaluation is due for that week.
+  - 2a2. Use case ends.
+- **3a. No student is outstanding:**
+  - 3a1. The system informs the instructor that every eligible student has submitted for the reminder week.
+  - 3a2. Use case ends.
+- **3b. The course section has students not assigned to a team:**
+  - 3b1. The system lists those students separately as not assigned to a team, and does not offer them for selection, since they cannot submit either artifact (BR-team-assignment-required).
+  - 3b2. Returns to step 3 of the normal flow.
+- **4a. The instructor chooses not to send any reminder:**
+  - 4a1. The system sends nothing and records nothing.
+  - 4a2. Use case ends.
+- **7a. A selected student has submitted since the list was displayed, or is no longer eligible (deactivated, or removed from her team):**
+  - 7a1. The system sends her no reminder for the artifacts she no longer owes; if she owes none, she is skipped and reported as "no longer outstanding."
+  - 7a2. Returns to step 7 for the next student.
+- **7b. The reminder week has changed since the list was displayed (the calendar week rolled over):**
+  - 7b1. The system sends no reminders and informs the instructor that the reminder week has changed, so that no student is reminded about a week whose peer evaluation window has closed (BR-evaluation-submission-window).
+  - 7b2. Returns to step 2 of the normal flow.
+- **7c. A selected student has already been reminded within the reminder limit (BR-reminder-limit):**
+  - 7c1. The system sends her no reminder and reports her as skipped, with the time of her last reminder.
+  - 7c2. Returns to step 7 for the next student.
+- **8a. The system cannot email one or more selected students:**
+  - 8a1. The system continues with the remaining students rather than abandoning the batch, so that one undeliverable address does not cost the other students their reminder.
+  - 8a2. The system records no reminder for a student it could not email, so the failed attempt does not count against the reminder limit.
+  - 8a3. The system reports which students it could not email, so that the instructor can follow up another way.
+  - 8a4. Returns to step 9 of the normal flow.
+
+**Priority:** Medium
+**Frequency of Use:** Approximately 2 users, 1 to 3 usages per course section per week during active weeks.
+**Business Rules:** BR-section-scoped-access, BR-role-based-access, BR-team-assignment-required, BR-student-lifecycle, BR-active-weeks, BR-evaluation-submission-window, BR-reminder-limit
+
+**Associated Information:**
+
+Reminder week: the calendar week before the current one. Both artifacts the reminder covers are for this week: a peer evaluation is always for the previous week (UC-EVA-submit-evaluation), and the weekly activity report reminded about is the one for the same week.
+
+Eligible student: a student in the course section whose account is active (not deactivated, BR-student-lifecycle) and who is assigned to a team (BR-team-assignment-required).
+
+Outstanding: an eligible student is outstanding for an artifact when, for the reminder week:
+
+| Artifact | Outstanding when |
+| ---- | ---- |
+| Weekly activity report | Her weekly activity report for the reminder week contains no activities (UC-WAR-manage-activities). A student who added activities and later deleted all of them is outstanding again; a student with at least one activity is not. |
+| Peer evaluation | She has not submitted a peer evaluation for the reminder week (UC-EVA-submit-evaluation). A submitted evaluation evaluates every team member, so there is no partial submission; editing a submitted evaluation (BR-evaluation-editable-until-close) does not make her outstanding. |
+
+A student may be outstanding for one artifact, both, or neither. Status is evaluated when the reminder is sent (step 7), not only when the list is displayed.
+
+List display: for each outstanding student, her name, team name, and which artifacts she owes. Students not assigned to a team are shown in a separate group (extension 3b). By default, every outstanding student is selected.
+
+Reminder message: each reminder is addressed to one student only, and names only the artifacts that student still owes for the reminder week. A student who owes both artifacts receives one email covering both. A reminder never names, counts, or otherwise reveals any other student or her submission status, and is never sent with other students as visible recipients (CO-ferpa).
+
+Access: the list and the ability to send reminders are limited to an instructor assigned to the course section, and a course admin of a course section in a course she owns (BR-section-scoped-access, BR-role-based-access). Students cannot see the list or anyone's submission status beyond their own.
+
+Durable state: each reminder sent is recorded as it is sent. If the use case fails partway through sending, the reminders already sent stay recorded and the ones not yet sent are not; the instructor can run the use case again, and the reminder limit prevents students already reminded from receiving a duplicate.
+
+The scheduled weekly reminder (FR-NOT-weekly-reminder) is a separate use case and is not covered here. Reminders sent by the scheduler do not count against the reminder limit.
+
+**Related Use Cases:** UC-WAR-team-war-report, UC-EVA-section-evaluation-report (both show who did not turn in an artifact for a week); UC-STU-view-pending-invitations (the same shape of listing, for registration rather than submission).
+**Assumptions:** AS-one-section-per-student
+**Open Issues:**
+
 ### **UC-STU-find-students: The course admin/instructor finds students**
 
 **UC ID and Name:** UC-STU-find-students: Find students
