@@ -1334,7 +1334,7 @@ No two teams can have the same name. The team name must be unique. The course ad
 4. The instructor selects the students to remind and confirms that she has finished selecting.
 5. The system displays the number of selected students and the reminder message, and asks the instructor to confirm.
 6. The instructor confirms sending the reminders.
-7. For each selected student, the system re-evaluates her status according to "Outstanding" and checks the reminder limit (BR-reminder-limit).
+7. The system confirms that the current reminder week is the one the list in step 3 was displayed for. Then, for each selected student, the system re-evaluates her status according to "Outstanding" and checks the reminder limit (BR-reminder-limit).
 8. The system sends each selected student who is still outstanding and within the limit one email naming only the artifacts she still owes, according to "Reminder message" in the Associated Information.
 9. The system records each reminder it sent.
 10. The system reports to the instructor which students were reminded and which were skipped, with the reason for each skip.
