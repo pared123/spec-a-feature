@@ -1359,9 +1359,10 @@ No two teams can have the same name. The team name must be unique. The course ad
 - **7b. The reminder week has changed since the list was displayed (the calendar week rolled over):**
   - 7b1. The system sends no reminders and informs the instructor that the reminder week has changed, so that no student is reminded about a week whose peer evaluation window has closed (BR-evaluation-submission-window).
   - 7b2. Returns to step 2 of the normal flow.
-- **7c. A selected student has already been reminded within the reminder limit (BR-reminder-limit):**
-  - 7c1. The system sends her no reminder and reports her as skipped, with the time of her last reminder.
-  - 7c2. Returns to step 7 for the next student.
+ - **7c. A selected student has already been reminded about one or more of her outstanding artifacts within the reminder limit (BR-reminder-limit):**
+  - 7c1. The system leaves those artifacts out of her reminder. If she still owes an artifact that is within the limit, her reminder names only that artifact; if every artifact she owes is limited, she is sent no reminder.
+  - 7c2. The system reports each artifact it left out for her as skipped, with the time she was last reminded about it.
+  - 7c3. Returns to step 7 for the next student.
 - **8a. The system cannot email one or more selected students:**
   - 8a1. The system continues with the remaining students rather than abandoning the batch, so that one undeliverable address does not cost the other students their reminder.
   - 8a2. The system records no reminder for a student it could not email, so the failed attempt does not count against the reminder limit.
@@ -1387,7 +1388,7 @@ Outstanding: an eligible student is outstanding for an artifact when, for the re
 
 A student may be outstanding for one artifact, both, or neither. Status is evaluated when the reminder is sent (step 7), not only when the list is displayed.
 
-List display: for each outstanding student, her name, team name, and which artifacts she owes. Students not assigned to a team are shown in a separate group (extension 3b). By default, every outstanding student is selected.
+List display: for each outstanding student, her name, team name, and which artifacts she owes. Students not assigned to a team whose accounts are active are shown in a separate group (extension 3b). Deactivated students are not shown anywhere in the list (BR-student-lifecycle). By default, every outstanding student is selected.
 
 Reminder message: each reminder is addressed to one student only, and names only the artifacts that student still owes for the reminder week. A student who owes both artifacts receives one email covering both. A reminder never names, counts, or otherwise reveals any other student or her submission status, and is never sent with other students as visible recipients (CO-ferpa).
 
